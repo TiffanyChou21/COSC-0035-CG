@@ -1,3 +1,7 @@
+#define drand48() (rand()%100)/100.0
+#include <stdio.h>
+#include <time.h>
+
 #ifdef _MSC_VER
 #include "msc.h"
 #endif

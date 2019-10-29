@@ -46,7 +46,7 @@ Vertex* Vertex::update()
 
 Edge::Edge()
 {
-	pos = new Point();
+	pos = new point();
 }
 
 
@@ -76,7 +76,7 @@ void Edge::calCost()
 		m.data[2][0], m.data[2][1], m.data[2][2]
 		);
 	if (abs(D) < 1e-10) {
-		Point p = (v1->loc + v2->loc) / 2;
+		point p = (v1->loc + v2->loc) / 2;
 		pos->x = p.x;
 		pos->y = p.y;
 		pos->z = p.z;
@@ -119,10 +119,10 @@ bool Edge::BorderEdge()
 
 void Face::calMatrix()
 {
-	Point n = cross(v1->loc - v3->loc, v2->loc - v3->loc);
-	n /= n.length();
+	normal = cross(v1->loc - v3->loc, v2->loc - v3->loc);
+	normal /= normal.length();
 
-	double temp[] = { n.x, n.y, n.z, -dot(n, v1->loc) };
+	double temp[] = { normal.x, normal.y, normal.z, -dot(normal, v1->loc) };
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			matrix.data[i][j] = temp[i] * temp[j];

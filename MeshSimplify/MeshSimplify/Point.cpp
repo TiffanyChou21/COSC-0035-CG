@@ -1,63 +1,63 @@
 #include "Point.h"
 
-Point::Point()
+point::point()
 {
 	x = y = z = 0;
 }
 
-Point::Point(double _x, double _y, double _z)
+point::point(double _x, double _y, double _z)
 {
 	x = _x;
 	y = _y;
 	z = _z;
 }
 
-Point Point::operator+(Point b)
+point point::operator+(point b)
 {
-	Point newPoint(x + b.x, y + b.y, z + b.z);
-	return newPoint;
+	point newpoint(x + b.x, y + b.y, z + b.z);
+	return newpoint;
 }
 
-Point Point::operator-(Point & b)
+point point::operator-(point & b)
 {
-	Point newPoint(x - b.x, y - b.y, z - b.z);
-	return newPoint;
+	point newpoint(x - b.x, y - b.y, z - b.z);
+	return newpoint;
 }
 
-Point Point::operator*(double p)
+point point::operator*(double p)
 {
-	return Point{ p*x, p*y, p*z };
+	return point{ p*x, p*y, p*z };
 }
 
-Point Point::operator/(double p)
+point point::operator/(double p)
 {
-	return Point{ x / p,  y / p,  z / p };
+	return point{ x / p,  y / p,  z / p };
 }
 
-Point Point::operator/=(double p)
+point point::operator/=(double p)
 {
 	x /= p, y /= p, z /= p;
 	return *this;
 }
 
-Point& Point::operator+=(Point &b)
+point& point::operator+=(point &b)
 {
 	x += b.x, y += b.y, z += b.z;
 	return *this;
 }
 
-Point & Point::operator-=(Point & b)
+point & point::operator-=(point & b)
 {
 	x -= b.x, y -= b.y, z -= b.z;
 	return *this;
 }
 
-double Point::length()
+double point::length()
 {
 	return sqrt(x*x + y*y + z*z);
 }
 
 
-Point::~Point()
+point::~point()
 {
 }

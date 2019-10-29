@@ -6,6 +6,8 @@
 #include <iomanip>
 using namespace std;
 
+point cross(point &a, point &b);
+
 bool cmpEdge(Edge* e1, Edge* e2) {
 	//return e1->cost < e2->cost;
 	if (e1->cost == e2->cost) {
@@ -45,6 +47,9 @@ MeshSimplify::~MeshSimplify()
 
 bool MeshSimplify::readFile(string filename)
 {
+	faceV.clear();
+	edgeV.clear();
+	vertexV.clear();
 	fstream file(filename, ios::in);
 	char line[1024];
 	while (!file.eof()) 
@@ -57,6 +62,12 @@ bool MeshSimplify::readFile(string filename)
 			file >> newV->loc.x;
 			file >> newV->loc.y;
 			file >> newV->loc.z;
+			if (abs(newV->loc.x) > maxLen)
+				maxLen = newV->loc.x;
+			if (abs(newV->loc.y) > maxLen)
+				maxLen = newV->loc.y;
+			if (abs(newV->loc.z) > maxLen)
+				maxLen = newV->loc.z;
 			// 加入顶点列表
 			vertexV.push_back(newV);
 			// 记录id
@@ -119,7 +130,7 @@ bool MeshSimplify::readFile(string filename)
 	cout << "面个数:" << faceV.size() << endl;
 	cout << "边条数:" << edgeV.size() << endl;
 	file.close();
-	return false;
+	return true;
 }
 
 void MeshSimplify::writeFile(string filename)
@@ -306,4 +317,70 @@ void MeshSimplify::simplify(double rate)
 	}
 	faceV = move(fa);
 	cout << endl;
+}
+
+void MeshSimplify::drawLine() {
+	glLineWidth(1.0);
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_LINES);
+	for (vector<Edge*>::iterator it = edgeV.begin(); it != edgeV.end(); it++)
+	{
+		Edge* edge = *it;
+		if (!edge->drawn)
+			continue;
+		Vertex* v1 = edge->v1;
+		Vertex* v2 = edge->v2;
+		glVertex3f(v1->loc.x , v1->loc.y, v1->loc.z);
+		glVertex3f(v2->loc.x, v2->loc.y, v2->loc.z);
+	}
+	glEnd();
+}
+
+void MeshSimplify::drawFace() {
+	
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_TRIANGLES);
+	for (vector<Face*>::iterator it = faceV.begin(); it != faceV.end(); it++)
+	{
+		Face* face = *it;
+		Vertex* v1 = face->v1;
+		Vertex* v2 = face->v2;
+		Vertex* v3 = face->v3;
+		glVertex3f(v1->loc.x, v1->loc.y , v1->loc.z );
+		glVertex3f(v2->loc.x , v2->loc.y , v2->loc.z );
+		glVertex3f(v3->loc.x , v3->loc.y , v3->loc.z );
+		glNormal3f(face->normal.x, face->normal.y, face->normal.z);
+	}
+	glEnd();
+}
+
+void MeshSimplify::delUselessLine() {
+	int count = 0;
+	for (Vertex* v : vertexV) {
+		// v的法向量
+		v->normal.x = v->normal.y = v->normal.z = 0;
+		for (Face* f : v->faceList) {
+			v->normal.x = f->normal.x;
+			v->normal.y = f->normal.y;
+			v->normal.z = f->normal.z;
+		}
+		// v的单位法向量
+		v->normal /= v->normal.length();
+		// 面的单位法向量
+		Face* face = *faceV.begin();
+		point faceNormal = face->normal;
+		if (abs(faceNormal.x - v->normal.x) < 0.2
+			&& abs(faceNormal.y - v->normal.y) < 0.2
+			&& abs(faceNormal.z - v->normal.z) < 0.2
+			)
+		{
+			for (Edge* e : v->edgeList)
+			{
+				e->drawn = false;
+				count++;
+			}
+		}
+	}
+	cout << count << "条线未显示" << endl; 
 }

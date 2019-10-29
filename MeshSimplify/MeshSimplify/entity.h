@@ -13,11 +13,12 @@ class Vertex
 {
 public:
 	int id;
-	Point loc;
+	point loc;
 	vector<Edge*> edgeList;
 	vector<Face*> faceList;
 	Matrix matrix;
 	Vertex* changeTo;
+	point normal;
 public:
 	Edge* connectTo(Vertex* v);
 	void combineTo(Vertex* v);
@@ -29,8 +30,9 @@ class Edge
 public:
 	Vertex *v1;
 	Vertex *v2;
-	Point *pos;
+	point *pos;
 	double cost;
+	bool drawn = true;
 public:
 	Edge();
 	Vertex* findAnotherVertex(Vertex *v);
@@ -46,6 +48,7 @@ public:
 	Vertex *v2;
 	Vertex *v3;
 	Matrix matrix;
+	point normal;
 public:
 	void calMatrix();
 	void matrixAddToVertix();

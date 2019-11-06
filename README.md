@@ -11,5 +11,6 @@ Finished basic function and extra function which needs OpenGL.
 [Here is a demo video](http://49.234.202.251/videos/MeshSimplifyDemo.mp4)
 ## Project 3
 
+We are so small for this giant project so bye！
 
 

@@ -6,8 +6,8 @@ using namespace std;
 MeshSimplify ms;
 
 float scale = 1.0;
-float xRotate = 0.0;
-float yRotate = 0.0;
+float xRotate = 30.0;
+float yRotate = 30.0;
 float xMove = 0.0;
 float yMove = 0.0;
 
@@ -27,25 +27,43 @@ void myMouse(int button, int status, int x, int y);
 void myKeyboard(unsigned char key, int x, int y);
 void onMouseMove(int x, int y);
 
+string in = "./objFile/dragon_modify.obj";
+string out = "./objFile/output.obj";
+
+
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
-	// 输入输出文件
-	string in, out;
-	in = "./objFile/dragon.obj";
-	out = "./objFile/output.obj";
 	// 直接显示结果
+	cout << "直接显示输入图形(y)或进行简化处理(n):";
+	string s;
+	cin >> s;
+	if (s == "y" || s == "yes") {
+		ms.readFile(in);
+		//ms.delUselessLine();
+		scale = 1/ms.maxLen * 0.75;
+		Init();
+		glutMainLoop();
+	}
 	//ms.readFile(in);
 	////ms.delUselessLine();
 	//scale = 1/ms.maxLen * 0.75;
 	//Init();
 	//glutMainLoop();
-	// 读取文件
+
+	 //读取文件
 	cout << "正在读取文件..." << endl;
 	ms.readFile(in);
 	cout << "文件读取成功" << endl;
 	// 简化处理
+	cout << "请输入简化比例(0-1之间的浮点数)" << endl;
+	float rate;
+	cin >> rate;
+	if (rate > 1 || rate <= 0) {
+		cout << "输入错误，默认设置为0.1" << endl;
+		rate = 0.1;
+	}
 	cout << "正在简化处理..." << endl;
-	ms.simplify(0.01);
+	ms.simplify(rate);
 	cout << "简化处理成功" << endl;
 	// 写入磁盘
 	cout << "正在写入文件..." << endl;
@@ -53,11 +71,11 @@ int main(int argc, char* argv[]) {
 	cout << "文件写入成功" << endl;
 	// 显示效果
 	cout << "是否显示简化图形(y/n)" << endl;
-	string s;
 	cin >> s;
 	if (s == "y" || s == "yes") {
 		ms.readFile(out);
 		//ms.delUselessLine();
+		scale = 1 / ms.maxLen * 0.75;
 		Init();
 		glutMainLoop();
 	}
@@ -141,8 +159,8 @@ void onMouseMove(int x, int y) {
 		yRotate += Oldx - x;
 		Oldx = x;
 		xRotate += Oldy - y;
-		glutPostRedisplay();
 		Oldy = y;
+		glutPostRedisplay();
 		//cout << xRotate << ":" << yRotate << endl;
 	}
 	else if (right_mouse_status) {

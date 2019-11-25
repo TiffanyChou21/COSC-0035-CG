@@ -96,7 +96,8 @@ bool MeshSimplify::readFile(string filename)
 			// 三条边
 			Edge* e1 = v1->connectTo(v2);
 			Edge* e2 = v2->connectTo(v3);
-			Edge* e3 = v1->connectTo(v2);
+			//Edge* e3 = v1->connectTo(v2);
+			Edge* e3 = v3->connectTo(v1);
 			if (!e1)
 			{
 				// 边设置顶点

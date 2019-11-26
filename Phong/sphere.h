@@ -2,16 +2,18 @@
 #define SPHEREH
 
 #include "hittable.h"
-
+class lambertian;
+class metal;
 class sphere: public hittable  {
     public:
         sphere() {}
-        sphere(vec3 cen, float r, material *m)
-            : center(cen), radius(r), mat_ptr(m)  {};
+        sphere(vec3 cen, float r, lambertian *a, metal *b)
+            : center(cen), radius(r), lam_ptr(a), met_ptr(b)  {};
         virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
         vec3 center;
         float radius;
-        material *mat_ptr; /* NEW */
+        lambertian *lam_ptr; /* NEW */
+        metal *met_ptr;
 };
 bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
     vec3 oc = r.origin() - center;
@@ -25,7 +27,8 @@ bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
-            rec.mat_ptr = mat_ptr; /* NEW */
+            rec.lam_ptr = lam_ptr; /* NEW */
+            rec.met_ptr = met_ptr;
             return true;
         }
         temp = (-b + sqrt(discriminant)) / a;
@@ -33,7 +36,8 @@ bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius;
-            rec.mat_ptr = mat_ptr; /* NEW */
+            rec.lam_ptr = lam_ptr; /* NEW */
+            rec.met_ptr = met_ptr;
             return true;
         }
     }

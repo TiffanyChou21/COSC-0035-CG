@@ -9,7 +9,7 @@ using namespace std;
 #include "math.h"
 
 #define MAX_FLOAT 0x1.fffffep+127f
-vec3 light_origin(0, 1, -1);
+vec3 light_origin(0, 0, 1);
 float light_s = 1.0;
 vec3 reflect_rate(1, 1, 1);
 vec3 light_color(0, 0, 1);
@@ -25,10 +25,10 @@ vec3 random_in_unit_sphere() {
 vec3 reflect(const vec3& v, const vec3& n) {
     return v - 2*dot(v,n)*n;
 }
-class lambertian : public material {
+class lambertian {
     public:
         lambertian(const vec3& a) : albedo(a) {}
-        virtual bool scatter(const ray& r_in, const hit_record& rec,
+        bool scatter(const ray& r_in, const hit_record& rec,
                              vec3& attenuation, ray& scattered) const {
             vec3 target = rec.p + rec.normal + random_in_unit_sphere();
             scattered = ray(rec.p, target-rec.p);
@@ -38,17 +38,19 @@ class lambertian : public material {
         vec3 albedo;
 };
 
-class metal : public material {
+class metal {
     public:
-        metal(const vec3& a) : albedo(a) {}
-        virtual bool scatter(const ray& r_in, const hit_record& rec,
-                             vec3& attenuation, ray& scattered) const {
-            vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
-            scattered = ray(rec.p, reflected);
-            attenuation = albedo;
-            return (dot(scattered.direction(), rec.normal) > 0);
+        metal(const vec3& a) : reflection(a) {}
+        vec3 getReflectColor(const ray& r_in, const hit_record& rec) const {
+            vec3 in = unit_vector(rec.p - light_origin);
+            vec3 h_middle = -(in + r_in.direction()) / 2;
+            float mulVal = dot(unit_vector(rec.normal), h_middle);
+            if(mulVal < 0)
+                return vec3(0, 0, 0);
+            vec3 result = reflection*pow(mulVal, light_s);
+            return result*light_color;
         }
-        vec3 albedo;
+        vec3 reflection;
 };
 
 vec3 color(const ray& r, hittable *world, int depth) {
@@ -57,8 +59,10 @@ vec3 color(const ray& r, hittable *world, int depth) {
         // return vec3(0, 0, 0);
         ray scattered;
         vec3 attenuation;
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-            return attenuation*color(scattered, world, depth+1);
+        if (depth < 50) {
+            rec.lam_ptr->scatter(r, rec, attenuation, scattered);
+            vec3 refColor = rec.met_ptr->getReflectColor(r, rec);
+            return attenuation*color(scattered, world, depth+1) + refColor;
         }
         else {
             return vec3(0,0,0);
@@ -71,44 +75,33 @@ vec3 color(const ray& r, hittable *world, int depth) {
     }
 }
 
-vec3 reflect_color(const ray& r,  hittable *world) {
-    hit_record rec;
-    if (world->hit(r, 0.001, MAX_FLOAT, rec)) {
-        vec3 in = unit_vector(rec.p - light_origin);
-
-        // ray check;
-        // check.A = rec.p;
-        // check.B = unit_vector(-in);
-        // hit_record temp;
-        // if(world->hit(check, 0.001, MAX_FLOAT, temp))
-        //     return vec3(0, 0, 0);
-
-        vec3 h_middle = -(in + r.direction()) / 2;
-        float mulVal = dot(unit_vector(rec.normal), h_middle);
-        if(mulVal < 0)
-            return vec3(0, 0, 0);
-        vec3 result = reflect_rate*pow(mulVal, light_s);
-        return result*light_color;
-    }
-    return vec3(0, 0, 0);
-}
-
 int main() {
     ofstream out("8.ppm");
     int nx = 500;
-    int ny = 500;
+    int ny = 250;
     int ns = 100;
     out << "P3\n" << nx << " " << ny << "\n255\n";
 
     hittable *list[4];
-    list[0] = new sphere(vec3(0,0,-1), 0.5, new lambertian(vec3(0.3, 0.3, 0.3)));
-    list[1] = new sphere(vec3(0,-100.5,-1), 100, new lambertian(vec3(0.3, 0.3, 0.3)));
-    //list[1] = new sphere(vec3(1,0,-1), 0.5, new metal(vec3(0.8, 0.6, 0.2)));
-    //list[2] = new sphere(vec3(-1,0,-1), 0.5, new metal(vec3(0.8, 0.8, 0.8)));
-    hittable *world = new hittable_list(list,2);
+    list[0] = new sphere(
+                    vec3(0,-0.5 ,0), 0.5, 
+                    new lambertian(vec3(0.1, 0.1, 0.1)),
+                    new metal(vec3(0.9, 0.9, 0.9))
+                );
+    list[1] = new sphere (
+                    vec3(0, 0.5, 0), 0.5, 
+                    new lambertian(vec3(0.1, 0.1, 0.1)), 
+                    new metal(vec3(0.7, 0.7, 0.7))
+                );
+    list[2] = new sphere(
+                    vec3(0, 0, -100.5), 100, 
+                    new lambertian(vec3(0.3, 0.3, 0.3)), 
+                    new metal(vec3(0.3, 0.3, 0.3))
+                );
+    hittable *world = new hittable_list(list, 3);
 
     // camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, float(nx)/float(ny));
-    camera cam(vec3(0, 0, 0), vec3(0,0,-1), vec3(0,1,0), 90, float(nx)/float(ny));
+    camera cam(vec3(1.2, 0, 0), vec3(0,0,0), vec3(0,0,1), 90, float(nx)/float(ny));
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);
@@ -119,21 +112,8 @@ int main() {
                 col += color(r, world, 0);
             }
             col /= float(ns);
-            
-            // reflect
-            ray r = cam.get_ray(1.0*i/nx, 1.0*j/ny);
-            vec3 col_temp = reflect_color(r, world);
-            col += col_temp;
-
 
             col = vec3( sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-
-            if(col[2] > 1)
-                col[2] = 1;
-            if(col[1] > 1)
-                col[1] = 1;
-            if(col[0] > 1)
-                col[0] = 1;
 
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);

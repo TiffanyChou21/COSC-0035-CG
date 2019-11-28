@@ -7,6 +7,8 @@ using namespace std;
 #include "camera.h"
 #include "random.h"
 #include "math.h"
+#include "model.h"
+#include <limits.h>
 
 #define MAX_FLOAT 0x1.fffffep+127f
 vec3 light_origin(0, 0, 1);
@@ -55,11 +57,11 @@ class metal {
 
 vec3 color(const ray& r, hittable *world, int depth) {
     hit_record rec;
-    if (world->hit(r, 0.001, MAX_FLOAT, rec)) {
+    if (world->hit(r, 0.001, FLT_MAX, rec)) {
         // return vec3(0, 0, 0);
         ray scattered;
         vec3 attenuation;
-        if (depth < 50) {
+        if (depth < 5) {
             rec.lam_ptr->scatter(r, rec, attenuation, scattered);
             vec3 refColor = rec.met_ptr->getReflectColor(r, rec);
             return attenuation*color(scattered, world, depth+1) + refColor;
@@ -77,31 +79,48 @@ vec3 color(const ray& r, hittable *world, int depth) {
 
 int main() {
     ofstream out("8.ppm");
-    int nx = 500;
-    int ny = 250;
-    int ns = 100;
+    int nx = 300;
+    int ny = 300;
+    int ns = 5;
     out << "P3\n" << nx << " " << ny << "\n255\n";
 
+    
     hittable *list[4];
-    list[0] = new sphere(
-                    vec3(0,-0.5 ,0), 0.5, 
-                    new lambertian(vec3(0.1, 0.1, 0.1)),
-                    new metal(vec3(0.9, 0.9, 0.9))
-                );
-    list[1] = new sphere (
-                    vec3(0, 0.5, 0), 0.5, 
-                    new lambertian(vec3(0.1, 0.1, 0.1)), 
+    // list[0] = new sphere(
+    //                 vec3(0,-0.5 ,0), 0.5, 
+    //                 new lambertian(vec3(0.1, 0.1, 0.1)),
+    //                 new metal(vec3(0.9, 0.9, 0.9))
+    //             );
+    // list[1] = new sphere (
+    //                 vec3(0, 0.5, 0), 0.5, 
+    //                 new lambertian(vec3(0.1, 0.1, 0.1)), 
+    //                 new metal(vec3(0.7, 0.7, 0.7))
+    //             );
+    // list[2] = new sphere(
+    //                 vec3(0, 0, -100.5), 100, 
+    //                 new lambertian(vec3(0.3, 0.3, 0.3)), 
+    //                 new metal(vec3(0.3, 0.3, 0.3))
+    //             );
+    model* m = new model(
+                    new lambertian(vec3(0.0, 0.0, 0.0)), 
                     new metal(vec3(0.7, 0.7, 0.7))
                 );
-    list[2] = new sphere(
-                    vec3(0, 0, -100.5), 100, 
-                    new lambertian(vec3(0.3, 0.3, 0.3)), 
-                    new metal(vec3(0.3, 0.3, 0.3))
-                );
-    hittable *world = new hittable_list(list, 3);
+    m->readFile("objFile/bunny_modify.obj");
+    list[0] = m;
 
-    // camera cam(vec3(-2,2,1), vec3(0,0,-1), vec3(0,1,0), 90, float(nx)/float(ny));
-    camera cam(vec3(1.2, 0, 0), vec3(0,0,0), vec3(0,0,1), 90, float(nx)/float(ny));
+    hittable *world = new hittable_list(list, 1);
+	
+	light_origin = vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, 1.5 * m->z_max);
+
+    camera cam(
+			//vec3(1.5 * m->x_min, 1.5*m->y_min, 1.5*m->z_min),
+			//vec3(1.5 * m->x_max, 1.5*m->y_max, 1.5*m->z_max),
+			light_origin,
+			vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, (m->z_max + m->z_min) / 2), 
+			vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, 1.5 * m->z_max), 
+			90,
+			float(nx)/float(ny)
+		);
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
             vec3 col(0, 0, 0);

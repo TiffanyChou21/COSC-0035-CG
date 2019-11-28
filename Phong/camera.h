@@ -2,13 +2,14 @@
 #define CAMERAH
 
 #include "ray.h"
+#define M_PI 3.1415926
 
 class camera {
     public:
         camera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect) {
             // vfov is top to bottom in degrees
             vec3 u, v, w;
-            float theta = vfov*M_PI/180;
+            float theta = vfov * M_PI/180;
             float half_height = tan(theta/2);
             float half_width = aspect * half_height;
             origin = lookfrom;

@@ -1,6 +1,5 @@
 #include "entity.h"
 #include "function.h"
-#include "entity.h"
 #include <iostream>
 using namespace std;
 

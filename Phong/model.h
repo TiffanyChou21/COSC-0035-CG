@@ -20,7 +20,7 @@ public:
 	model(lambertian *a, metal *b)
 		: lam_ptr(a), met_ptr(b) {};
 	virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
-	bool readFile(string filename);
+    bool readFile(string filename);
 	lambertian *lam_ptr; /* NEW */
 	metal *met_ptr;
 
@@ -142,6 +142,5 @@ bool model::readFile(string filename) {
 	file.close();
 	return true;
 }
-
 
 #endif

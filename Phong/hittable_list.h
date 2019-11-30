@@ -3,6 +3,7 @@
 
 #include "hittable.h"
 
+
 class hittable_list: public hittable {
     public:
         hittable_list() {}
@@ -28,5 +29,6 @@ bool hittable_list::hit(const ray& r, float t_min, float t_max,
     }
     return hit_anything;
 }
+
 
 #endif

@@ -1,6 +1,4 @@
-#include <iostream>
 #include <fstream>
-using namespace std;
 #include "float.h"
 #include "hittable_list.h"
 #include "sphere.h"
@@ -9,12 +7,13 @@ using namespace std;
 #include "math.h"
 #include "model.h"
 #include <limits.h>
+#include "rectangle.h"
 
 #define MAX_FLOAT 0x1.fffffep+127f
-vec3 light_origin(0, 0, 1);
+vec3 light_origin(0,1,0);
 float light_s = 1.0;
 vec3 reflect_rate(1, 1, 1);
-vec3 light_color(0, 0, 1);
+vec3 light_color(1,1,1);
 
 vec3 random_in_unit_sphere() {
     vec3 p;
@@ -58,7 +57,6 @@ class metal {
 vec3 color(const ray& r, hittable *world, int depth) {
     hit_record rec;
     if (world->hit(r, 0.001, FLT_MAX, rec)) {
-        // return vec3(0, 0, 0);
         ray scattered;
         vec3 attenuation;
         if (depth < 5) {
@@ -78,46 +76,64 @@ vec3 color(const ray& r, hittable *world, int depth) {
 }
 
 int main() {
+    time_t start=time(0);
     ofstream out("8.ppm");
     int nx = 300;
     int ny = 300;
     int ns = 5;
     out << "P3\n" << nx << " " << ny << "\n255\n";
 
+        lambertian *red = new lambertian(vec3(0.65, 0.05, 0.05));
+        lambertian *light=new lambertian(vec3(15, 15, 15));
+        lambertian *green=new lambertian(vec3(0.05, 0.65, 0.05));
+        lambertian *white=new lambertian(vec3(0.73, 0.73, 0.73));
+    //    lambertian *green=new lambertian(vec3(0.12, 0.45, 0.15));
+    hittable *list[7];
+//     list[0] = new sphere(
+//                     vec3(0,-0.5 ,0), 0.5,
+//                     new lambertian(vec3(0.1, 0.1, 0.1)),
+//                     new metal(vec3(0.9, 0.9, 0.9))
+//                 );
+//     list[1] = new sphere (
+//                     vec3(0, 0.5, 0), 0.5,
+//                     new lambertian(vec3(0.1, 0.1, 0.1)),
+//                     new metal(vec3(0.7, 0.7, 0.7))
+//                 );
+//    list[2]=new yz_rect(-1,1,-1,1,1,red);
+//    list[3]=new flip_normals(new yz_rect(-1,1,-1,1,-1,green));
+//    list[4]=new xz_rect(-1,1,-1,1,1,white);
+//    list[5]=new flip_normals(new xz_rect(-1,1,-1,1,-1,white));
+//    list[6]=new flip_normals(new xy_rect(-1,1,-1,1,-1,white));
     
-    hittable *list[4];
-    // list[0] = new sphere(
-    //                 vec3(0,-0.5 ,0), 0.5, 
-    //                 new lambertian(vec3(0.1, 0.1, 0.1)),
-    //                 new metal(vec3(0.9, 0.9, 0.9))
-    //             );
-    // list[1] = new sphere (
-    //                 vec3(0, 0.5, 0), 0.5, 
-    //                 new lambertian(vec3(0.1, 0.1, 0.1)), 
-    //                 new metal(vec3(0.7, 0.7, 0.7))
-    //             );
-    // list[2] = new sphere(
-    //                 vec3(0, 0, -100.5), 100, 
-    //                 new lambertian(vec3(0.3, 0.3, 0.3)), 
-    //                 new metal(vec3(0.3, 0.3, 0.3))
-    //             );
+    //obj world
+    
     model* m = new model(
-                    new lambertian(vec3(0.0, 0.0, 0.0)), 
+                    new lambertian(vec3(0.1, 0.1, 0.1)),
                     new metal(vec3(0.7, 0.7, 0.7))
                 );
-    m->readFile("objFile/bunny_modify.obj");
-    list[0] = m;
-
-    hittable *world = new hittable_list(list, 1);
-	
-	light_origin = vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, 1.5 * m->z_max);
-
+    m->readFile("objFile/cube1.obj");
+    list[0]=new yz_rect(m->y_min,2*m->y_max,2*m->z_min,10*m->z_max,3*m->x_max,red);
+    list[1]=new flip_normals(new yz_rect(m->y_min,2*m->y_max,2*m->z_min,10*m->z_max,3*m->x_min,green));
+    list[2]=new flip_normals(new xy_rect(m->x_min>0?-3*m->x_min:3*m->x_min,3*m->x_max,m->y_min,2*m->y_max,2*m->z_min,white));
+    list[3]=new flip_normals(new xz_rect(3*m->x_min,3*m->x_max,2*m->z_min,10*m->z_max,m->y_min,white));
+    list[4]=new xz_rect(3*m->x_min,3*m->x_max,2*m->z_min,10*m->z_max,2*m->y_max,white);
+    list[5] = m;
+    
+    //obj world end
+    hittable *world = new hittable_list(list, 6);
+    //非obj照相机
+//    camera cam(vec3(0,0,2),vec3(0,0.01,0),vec3(0,0,2),90,float(nx)/float(ny));
+    
+    
+        vec3 cam_origin=vec3(3*(m->x_max + m->x_min) / 2,2*(m->y_max + m->y_min) / 2,6*m->z_max);
     camera cam(
 			//vec3(1.5 * m->x_min, 1.5*m->y_min, 1.5*m->z_min),
 			//vec3(1.5 * m->x_max, 1.5*m->y_max, 1.5*m->z_max),
-			light_origin,
-			vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, (m->z_max + m->z_min) / 2), 
-			vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, 1.5 * m->z_max), 
+//               vec3(0.4,0.5,0.1),
+               cam_origin,
+
+			vec3((m->x_max + m->x_min) / 2, (m->y_max + m->y_min) / 2, (m->z_max + m->z_min) / 2),
+               vec3(3*(m->x_max + m->x_min) / 2,3*(m->y_max + m->y_min) / 2,6*m->z_max),
 			90,
 			float(nx)/float(ny)
 		);
@@ -142,4 +158,6 @@ int main() {
         }
     }
     out.close();
+    time_t end=time(0);
+    cout<<"Cost "<<end-start<<" s"<<endl;
 }

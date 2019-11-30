@@ -10,7 +10,7 @@ class sphere: public hittable  {
         sphere(vec3 cen, float r, lambertian *a, metal *b)
             : center(cen), radius(r), lam_ptr(a), met_ptr(b)  {};
         virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
-        vec3 center;
+            vec3 center;
         float radius;
         lambertian *lam_ptr; /* NEW */
         metal *met_ptr;

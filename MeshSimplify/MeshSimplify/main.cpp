@@ -1,6 +1,7 @@
 #include "MeshSimplify.h"
 #include <iostream>
 #include <string>
+#include <time.h>
 using namespace std;
 
 MeshSimplify ms;
@@ -27,13 +28,30 @@ void myMouse(int button, int status, int x, int y);
 void myKeyboard(unsigned char key, int x, int y);
 void onMouseMove(int x, int y);
 
-string in = "./objFile/dragon_modify.obj";
+string in = "./objFile/";
 string out = "./objFile/output.obj";
 
 
 int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	// 直接显示结果
+	cout << "请选择简化处理obj文件" << endl;
+	cout << "0.dragon\n1.Arma\n2.Block\n3.Buddha\n4.Bunny\n5.Dinosaur\n6.horse\n7.kitten\n";
+	int ch; cin >> ch;
+	cout << "是(y)否(n)使用modify.obj加快处理速度以更好的呈现网格简化效果(建议)\n";
+	string  modify; cin >> modify;
+	switch (ch)
+	{
+		case 0:if (modify == "y")in += "dragon_modify.obj"; else in += "dragon.obj"; break;
+		case 1:if (modify == "y")in += "Arma_modify.obj"; else in += "Arma.obj"; break;
+		case 2:if (modify == "y")in += "block_modify.obj"; else in += "block.obj"; break;
+		case 3:if (modify == "y")in += "Buddha_modify.obj"; else in += "Buddha.obj"; break;
+		case 4:if (modify == "y")in += "bunny_modify.obj"; else in += "bunny.obj"; break;
+		case 5:if (modify == "y")in += "dinosaur_modify.obj"; else in += "dinosaur.obj"; break;
+		case 6:if (modify == "y")in += "horse_modify.obj"; else in += "horse.obj"; break;
+		case 7:if (modify == "y")in += "kitten_modify.obj"; else in += "kitten.obj"; break;
+		default:if (modify == "y")in += "dragon_modify.obj"; else in += "dragon_modify.obj"; break;
+	}
 	cout << "直接显示输入图形(y)或进行简化处理(n):";
 	string s;
 	cin >> s;
@@ -51,6 +69,7 @@ int main(int argc, char* argv[]) {
 	//glutMainLoop();
 
 	 //读取文件
+	time_t start = time(0);
 	cout << "正在读取文件..." << endl;
 	ms.readFile(in);
 	cout << "文件读取成功" << endl;
@@ -70,7 +89,10 @@ int main(int argc, char* argv[]) {
 	ms.writeFile(out);
 	cout << "文件写入成功" << endl;
 	// 显示效果
-	cout << "是否显示简化图形(y/n)" << endl;
+	time_t end = time(0);
+	cout << "耗时" << end - start << "s\n";
+	cout << "是否OpenGL显示简化图形(y/n)" << endl;
+	cout << "左键旋转,右键平移,滚轮缩放,键入1、2、3选择不同网格显示模式\n";
 	cin >> s;
 	if (s == "y" || s == "yes") {
 		ms.readFile(out);

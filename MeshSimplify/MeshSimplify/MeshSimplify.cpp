@@ -167,7 +167,6 @@ void MeshSimplify::simplify(double rate)
 	//priority_queue<Edge*, vector<Edge*>, cmpEdgeCost> edgeQueue;
 	for (Edge* e : edgeV) {
 		e->calCost();
-
 		edgeSet.insert(e);
 		//edgeQueue.push(e);
 	}

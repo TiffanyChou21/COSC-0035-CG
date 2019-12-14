@@ -18,9 +18,13 @@ public:
 public:
 	MeshSimplify();
 	~MeshSimplify();
+	// 读取文件，读取成功返回true
 	bool readFile(string filename);
+	// 写入文件
 	void writeFile(string filename);
+	// 开始简化
 	void simplify(double rate);
+	// 用于OpenGL显示的函数
 	void drawLine();
 	void drawFace();
 	void delUselessLine();

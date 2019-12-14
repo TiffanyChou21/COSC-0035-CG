@@ -8,6 +8,8 @@ using namespace std;
 
 point cross(point &a, point &b);
 
+// 边的cost值比较
+// 用于优先队列排序
 bool cmpEdge(Edge* e1, Edge* e2) {
 	//return e1->cost < e2->cost;
 	if (e1->cost == e2->cost) {
@@ -18,15 +20,20 @@ bool cmpEdge(Edge* e1, Edge* e2) {
 	}
 }
 
+// 判断两边相等(判断对应点相同，而不是指针地址相同)
+// 用于边的去重
 bool equalEdge(Edge* e1, Edge* e2) {
 	return (e1->v1 == e2->v1 && e1->v2 == e2->v2)
 		|| (e1->v1 == e2->v2 && e1->v2 == e2->v1);
 }
 
+// 面排序函数
 bool cmpFace(Face* f1, Face* f2) {
 	return f1 < f2;
 }
 
+// 判断两面相等(判断对应点相同，而不是指针地址相同)
+// 用于面的去重
 bool equalFace(Face* f1, Face* f2) {
 	return (f1->v1 == f2->v1 && f1->v2 == f2->v2 && f1->v3 == f2->v3)
 		|| (f1->v1 == f2->v1 && f1->v2 == f2->v3 && f1->v3 == f2->v2)
@@ -47,6 +54,7 @@ MeshSimplify::~MeshSimplify()
 
 bool MeshSimplify::readFile(string filename)
 {
+	// 清空数据
 	faceV.clear();
 	edgeV.clear();
 	vertexV.clear();
@@ -55,9 +63,9 @@ bool MeshSimplify::readFile(string filename)
 	while (!file.eof()) 
 	{
 		file >> line;
-		if (strcmp(line, "v") == 0) // ����
+		if (strcmp(line, "v") == 0) // 点
 		{
-			// ���붥��
+			// 读取点信息
 			Vertex* newV = new Vertex;
 			file >> newV->loc.x;
 			file >> newV->loc.y;
@@ -68,44 +76,43 @@ bool MeshSimplify::readFile(string filename)
 				maxLen = newV->loc.y;
 			if (abs(newV->loc.z) > maxLen)
 				maxLen = newV->loc.z;
-			// ���붥���б�
+			// 加入点列表
 			vertexV.push_back(newV);
-			// ��¼id
+			// 点的id
 			newV->id = vertexV.size();
 		}
-		else if (strcmp(line, "f") == 0) // ��
+		else if (strcmp(line, "f") == 0) // 面
 		{
 			Face* newF = new Face;
-			// ������������id
+			// 三点id
 			int id1, id2, id3;
 			file >> id1 >> id2 >> id3;
-			// ��ȡ��������
+			// 获取对应点
 			Vertex* v1, *v2, *v3;
 			v1 = vertexV[id1 - 1];
 			v2 = vertexV[id2 - 1];
 			v3 = vertexV[id3 - 1];
-			// ���ϼ�¼��������
+			// 面上记录邻接点
 			newF->v1 = v1;
 			newF->v2 = v2;
 			newF->v3 = v3;
-			// ��¼�������ӵ���
+			// 点上记录邻接面
 			v1->faceList.push_back(newF);
 			v2->faceList.push_back(newF);
 			v3->faceList.push_back(newF);
 			faceV.push_back(newF);
-			// ������
+			// 判断三边是否存在
 			Edge* e1 = v1->connectTo(v2);
 			Edge* e2 = v2->connectTo(v3);
-			//Edge* e3 = v1->connectTo(v2);
 			Edge* e3 = v3->connectTo(v1);
+			// 如果不空，则边已经存在，无需加入重复边
 			if (!e1)
 			{
-				// �����ö���
 				e1 = new Edge; e1->v1 = v1; e1->v2 = v2;
-				// ��¼���������ı�
+				// 点上记录邻接边
 				v1->edgeList.push_back(e1);
 				v2->edgeList.push_back(e1);
-				// ������б�
+				// 加入边列表
 				edgeV.push_back(e1);
 			}
 			if (!e2)
@@ -123,20 +130,24 @@ bool MeshSimplify::readFile(string filename)
 				edgeV.push_back(e3);
 			}
 
+			// 计算面维护的矩阵
 			newF->calMatrix();
+			// 将矩阵值加到点上
 			newF->matrixAddToVertix();
 		}
 	}
-	cout << "�������:" << vertexV.size() << endl;
-	cout << "�����:" << faceV.size() << endl;
-	cout << "������:" << edgeV.size() << endl;
+	cout << "点个数:" << vertexV.size() << endl;
+	cout << "面个数:" << faceV.size() << endl;
+	cout << "边条数:" << edgeV.size() << endl;
 	file.close();
 	return true;
 }
 
+// 将简化后的模型保存到文件中
 void MeshSimplify::writeFile(string filename)
 {
 	fstream file(filename, ios::out);
+	// 点信息
 	for (Vertex* v : vertexV) 
 	{
 		file << "v " 
@@ -144,6 +155,7 @@ void MeshSimplify::writeFile(string filename)
 			<< v->loc.y << " " 
 			<< v->loc.z << endl;
 	}
+	// 面信息
 	for (Face* f : faceV) 
 	{
 		file << "f "
@@ -154,30 +166,36 @@ void MeshSimplify::writeFile(string filename)
 	file.close();
 }
 
+// 输入参数为简化比例
 void MeshSimplify::simplify(double rate)
 {
 	int curFaceNum = faceV.size();
 	int endNum = (int)curFaceNum * rate;
 	int distance = curFaceNum - endNum;
-	cout << "ԭ��������" << curFaceNum << endl;
-	cout << "Ŀ������:" << endNum << endl;
-	cout << "��ǰ������" << curFaceNum << endl;
-	cout << "���ڼ���costֵ..." << endl;
+	cout << "原有面数:" << curFaceNum << endl;
+	cout << "目标面数:" << endNum << endl;
+	cout << "当前面数:" << curFaceNum << endl;
+	cout << "正在计算costֵ值..." << endl;
+	// 用set集合实现去重，同时给出cmpEdge函数实现优先队列
 	set<Edge*, function<bool(Edge*, Edge*)>> edgeSet(cmpEdge);
 	//priority_queue<Edge*, vector<Edge*>, cmpEdgeCost> edgeQueue;
 	for (Edge* e : edgeV) {
+		// 计算cost值
 		e->calCost();
 		edgeSet.insert(e);
 		//edgeQueue.push(e);
 	}
 
 	//return;
-	cout << "����ɹ�" << endl;
-	cout << "����ɾ����" << endl;
+	cout << "计算成功" << endl;
+	cout << "正在删除边" << endl;
+	// 要删除的边数目
 	int rmngNum = distance;
 	//while (curFaceNum > endNum)
 	while(rmngNum > 0)
 	{
+		// 删除优先队列第一个
+		// 即删除cost最小边
 		Edge* e = *(edgeSet.begin());
 		edgeSet.erase(e);
 
@@ -192,6 +210,8 @@ void MeshSimplify::simplify(double rate)
 
 		//Edge* e = edgeQueue.top();
 		//edgeQueue.pop();
+		
+		// 更新点位置(上一轮循环可能有合并)
 		Vertex* v1 = e->v1;
 		Vertex* v2 = e->v2;
 		if (v1 != v1->update() || 
@@ -199,11 +219,15 @@ void MeshSimplify::simplify(double rate)
 			v1 == v2) 
 			continue;
 
+		// 将v2邻接的边&面加入到v1上，并计算合并后的点位置
 		v2->combineTo(v1);
+		// v1移动到合并后的点位置
 		v1->loc.x = e->pos->x;
 		v1->loc.y = e->pos->y;
 		v1->loc.z = e->pos->z;
 
+		// 将v1周围的边在优先队列中删除
+		// 因为这些边需要重新计算cost值
 		for (vector<Edge*>::iterator it = v1->edgeList.begin(); it != v1->edgeList.end();) {
 			Edge* temp = *it;
 			edgeSet.erase(temp);
@@ -225,6 +249,9 @@ void MeshSimplify::simplify(double rate)
 		//		unique(v1->edgeList.begin(), v1->edgeList.end(), equalEdge),
 		//		v1->edgeList.end()
 		//	);
+
+		// 对v1周围的边排序去重
+		// 排序
 		sort(v1->edgeList.begin(), v1->edgeList.end(),
 			[&v1](Edge* a, Edge* b) {
 			Vertex* ta = a->findAnotherVertex(v1);
@@ -236,18 +263,20 @@ void MeshSimplify::simplify(double rate)
 				return ta < tb;
 			}
 		});
+		// 去重
 		unique(v1->edgeList.begin(), v1->edgeList.end(), 
 			[&v1](Edge* a, Edge* b) {
 			return a->findAnotherVertex(v1) == b->findAnotherVertex(v1);
 		});
 
+		// 记录修改过的边
 		vector<Edge*> modifiedEdge;
-		//if (!recalculate) {
 		modifiedEdge.insert(modifiedEdge.end(), v1->edgeList.begin(), v1->edgeList.end());
-		//}
 
+		// 对面排序去重
 		sort(v1->faceList.begin(), v1->faceList.end());
 		unique(v1->faceList.begin(), v1->faceList.end());
+		// 更新面
 		for (vector<Face*>::iterator it = v1->faceList.begin(); it != v1->faceList.end(); it++) {
 			if (!(*it)->v1)
 				continue;
@@ -255,20 +284,23 @@ void MeshSimplify::simplify(double rate)
 		}
 
 		for (vector<Face*>::iterator it = v1->faceList.begin(); it != v1->faceList.end(); ) {
-			if (!(*it)->v1 || !(*it)->updateVertex()) { //��Ч��
+			if (!(*it)->v1 || !(*it)->updateVertex()) { // 坏面
 				if ((*it)->v1) {
-					(*it)->v1 = nullptr;//�����ʧЧ
-					curFaceNum--;//�������ټ���
+					(*it)->v1 = nullptr; // 设置为坏面
+					curFaceNum--;// 当前面数量减少1
 					rmngNum--;
 				}
+				// 坏面删除
 				it = v1->faceList.erase(it);
 				continue;
 			}
 			it++;
 		}
 
+		// 再次对边排序去重
 		sort(modifiedEdge.begin(), modifiedEdge.end());
 		modifiedEdge.resize((unique(modifiedEdge.begin(), modifiedEdge.end()) - modifiedEdge.begin()));
+		// 重新计算cost值并加入边优先队列
 		for (Edge* x : modifiedEdge) {
 			edgeSet.erase(x);
 			x->updateVertex();
@@ -291,7 +323,9 @@ void MeshSimplify::simplify(double rate)
 		//	v1->faceList.end()
 		//	);
 
-		//cout << "��ǰ������" << curFaceNum << endl;
+		//cout << "当前面数" << curFaceNum << endl;
+
+		// 显示当前完成进度
 		double finishRate = 100.0*(distance - rmngNum) / distance;
 		cout << "[";
 		int i;
@@ -301,6 +335,8 @@ void MeshSimplify::simplify(double rate)
 			cout << "=";
 		cout << "][" << (int)finishRate << "%]                  \r";
 	}
+
+	// 将点结果集替换原来点集合
 	vector<Vertex*> ve;
 	for (Vertex* v : vertexV) {
 		if (v->update() == v) {
@@ -309,6 +345,7 @@ void MeshSimplify::simplify(double rate)
 		}
 	}
 	vertexV = move(ve);
+	// 面结果集替换原来面集合
 	vector<Face*> fa;
 	for (Face* f : faceV) {
 		if (f->v1 != nullptr && f->updateVertex()) {
@@ -358,16 +395,16 @@ void MeshSimplify::drawFace() {
 void MeshSimplify::delUselessLine() {
 	int count = 0;
 	for (Vertex* v : vertexV) {
-		// v�ķ�����
+		// v�ķ�����
 		v->normal.x = v->normal.y = v->normal.z = 0;
 		for (Face* f : v->faceList) {
 			v->normal.x = f->normal.x;
 			v->normal.y = f->normal.y;
 			v->normal.z = f->normal.z;
 		}
-		// v�ĵ�λ������
+		// v�ĵ�λ������
 		v->normal /= v->normal.length();
-		// ��ĵ�λ������
+		// ��ĵ�λ������
 		Face* face = *faceV.begin();
 		point faceNormal = face->normal;
 		if (abs(faceNormal.x - v->normal.x) < 0.2
@@ -382,5 +419,5 @@ void MeshSimplify::delUselessLine() {
 			}
 		}
 	}
-	cout << count << "����δ��ʾ" << endl; 
+	cout << count << "条边未显示" << endl; 
 }

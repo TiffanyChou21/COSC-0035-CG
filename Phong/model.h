@@ -1,7 +1,7 @@
 #ifndef MODEL
 #define MODEL
 
-#include "hittable.h"
+#include "hitable.h"
 #include "entity.h"
 #include <string>
 #include <vector>
@@ -13,16 +13,16 @@
 using namespace std;
 
 class lambertian;
+class material;
 class metal;
-class model : public hittable {
+class model : public hitable {
 public:
 	model() {}
-	model(lambertian *a, metal *b)
-		: lam_ptr(a), met_ptr(b) {};
+	model(material *b)
+		: mat_ptr(b) {};
 	virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec) const;
     bool readFile(string filename);
-	lambertian *lam_ptr; /* NEW */
-	metal *met_ptr;
+	material *mat_ptr;
 
 	vector<Vertex*> vertexV;
 	vector<Face*> faceV;
@@ -43,8 +43,7 @@ bool model::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
 		if (f->InterTriangle(r, temp_rec) && temp_rec.t < rec.t) {
 			rec = temp_rec;
 			rec.normal = f->normal;
-			rec.lam_ptr = this->lam_ptr;
-			rec.met_ptr = this->met_ptr;
+			rec.mat_ptr = this->mat_ptr;
 			flag = true;
 		}
 	}

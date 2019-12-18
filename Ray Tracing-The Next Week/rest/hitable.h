@@ -59,7 +59,8 @@ class translate : public hitable {
 };
 
 bool translate::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
-    ray moved_r(r.origin() - offset, r.direction(), r.time());
+    // ray moved_r(r.origin() - offset, r.direction(), r.time());
+    ray moved_r(r.origin() - offset, r.direction());
     if (ptr->hit(moved_r, t_min, t_max, rec)) {
         rec.p += offset;
         return true;
@@ -126,7 +127,8 @@ bool rotate_y::hit(const ray& r, float t_min, float t_max, hit_record& rec) cons
     origin[2] =  sin_theta*r.origin()[0] + cos_theta*r.origin()[2];
     direction[0] = cos_theta*r.direction()[0] - sin_theta*r.direction()[2];
     direction[2] = sin_theta*r.direction()[0] + cos_theta*r.direction()[2];
-    ray rotated_r(origin, direction, r.time());
+    ray rotated_r(origin, direction);
+    // ray rotated_r(origin, direction, r.time());
     if (ptr->hit(rotated_r, t_min, t_max, rec)) {
         vec3 p = rec.p;
         vec3 normal = rec.normal;

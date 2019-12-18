@@ -63,4 +63,22 @@ public:
 	perlin noise;
 	float scale;
 };
+class checker_texture : public texture
+{
+public:
+    checker_texture(){}
+    checker_texture(texture *t0, texture *t1): even(t0), odd(t1){}
+ 
+    virtual vec3 value(float u, float v, const vec3& p) const
+    {
+        float sines = sin(5 * p.x())*sin(5 * p.y())*sin(5 * p.z());
+        if (sines < 0)
+            return odd->value(u, v, p);
+        else
+            return even->value(u, v, p);
+    }
+ 
+    texture* odd;
+    texture* even;
+};
 #endif

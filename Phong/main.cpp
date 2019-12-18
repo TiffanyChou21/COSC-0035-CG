@@ -19,7 +19,7 @@ using namespace std;
 #include "dielectric.h"
 #include "perlin.h"
 #include "diffuse_light.h"
-#include "xy_rect.h"
+#include "rect.h"
 #include "box.h"
 #include "model.h"
 #include <time.h>
@@ -29,7 +29,7 @@ using namespace std;
 #include "stb_image.h"
 #include "flip_normals.h"
 #include "translate.h"
-#include "rotate_y.h"
+#include "rotate.h"
 // #include "constant_medium.h"
 #include "pdf.h"
 #include "hitable_pdf.h"
@@ -42,7 +42,7 @@ vec3 light_origin = vec3(0, 555, 0);
 void cornell_box(hitable **scene, camera **cam, float aspect)
 {
     int i = 0;
-    hitable **list = new hitable *[9];
+    hitable **list = new hitable *[10];
     material *red = new lambertian(new constant_texture(vec3(0.65f, 0.05f, 0.05f)));
     material *white = new lambertian(new constant_texture(vec3(0.73f, 0.73f, 0.73f)));
     material *green = new lambertian(new constant_texture(vec3(0.12f, 0.45f, 0.15f)));
@@ -62,6 +62,8 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
     list[i++] = new sphere(vec3(190, 190, 190), 90, emat);/*New*/
     texture *pertext = new noise_texture(0.1);/*New*/
     list[i++] =  new sphere(vec3(400, 210, 210),90, new lambertian( pertext));/*New*/
+    texture *checker = new checker_texture(new constant_texture(vec3(0.05, 0.05, 0.05)),new constant_texture(vec3(0.9, 0.9, 0.9)));/*New*/
+    list[i++] = new sphere(vec3(90, 90, 90),100, new lambertian(checker));
     *scene = new hitable_list(list, i);
 
 	vec3 lookfrom(278, 278, -800);

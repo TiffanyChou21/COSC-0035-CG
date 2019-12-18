@@ -2,7 +2,7 @@
 #define BOXH
 
 #include "hitable.h"
-#include "xy_rect.h"
+#include "rect.h"
 #include "flip_normals.h"
 #include "hitable_list.h"
 

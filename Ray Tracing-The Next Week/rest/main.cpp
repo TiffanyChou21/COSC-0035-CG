@@ -1,14 +1,9 @@
-#define drand48() (rand()%100)/100.0
+// #define drand48() (rand()%100)/100.0
 #include <stdio.h>
 #include <time.h>
-
-#ifdef _MSC_VER
-#include "msc.h"
-#endif
 #include <iostream>
 #include <fstream>
 #include "sphere.h"
-#include "moving_sphere.h"
 #include "hitable_list.h"
 #include "float.h"
 #include "camera.h"
@@ -44,7 +39,8 @@ vec3 color(const ray& r, hitable *world, hitable *light_shape, int depth) {
             else {
                 hitable_pdf plight(light_shape, hrec.p);
                 mixture_pdf p(&plight, srec.pdf_ptr);
-                ray scattered = ray(hrec.p, p.generate(), r.time());
+                // ray scattered = ray(hrec.p, p.generate(), r.time());/*New*/
+                ray scattered = ray(hrec.p, p.generate());/*New*/
                 float pdf_val = p.value(scattered.direction());
                 delete srec.pdf_ptr;
                 return emitted + srec.attenuation*hrec.mat_ptr->scattering_pdf(r, hrec, scattered)*color(scattered, world, light_shape, depth+1) / pdf_val;
@@ -59,7 +55,7 @@ vec3 color(const ray& r, hitable *world, hitable *light_shape, int depth) {
 
 void cornell_box(hitable **scene, camera **cam, float aspect) {
     int i = 0;
-    hitable **list = new hitable*[8];
+    hitable **list = new hitable*[10];
     material *red = new lambertian( new constant_texture(vec3(0.65, 0.05, 0.05)) );
     material *white = new lambertian( new constant_texture(vec3(0.73, 0.73, 0.73)) );
     material *green = new lambertian( new constant_texture(vec3(0.12, 0.45, 0.15)) );
@@ -71,10 +67,23 @@ void cornell_box(hitable **scene, camera **cam, float aspect) {
     list[i++] = new xz_rect(0, 555, 0, 555, 0, white);
     list[i++] = new flip_normals(new xy_rect(0, 555, 0, 555, 555, white));
     material *glass = new dielectric(1.5);
-    list[i++] = new sphere(vec3(190, 90, 190),90 , glass);
-    list[i++] = new translate(new rotate_y(
-                    new box(vec3(0, 0, 0), vec3(165, 330, 165), white),  15), vec3(265,0,295));
+    // list[i++] = new sphere(vec3(190, 90, 190),90 , glass);   /*New*/
+    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 330, 165), white),  15), vec3(265,0,295));
+    int xx, yy, nn;/*New*/
+    unsigned char *tex_data = stbi_load("earthmap.jpg", &xx, &yy, &nn, 0);/*New*/
+    material *emat =  new lambertian(new image_texture(tex_data, xx, yy));/*New*/
+    list[i++] = new sphere(vec3(190, 90, 190), 90, emat);/*New*/
+    texture *pertext = new noise_texture(0.1);/*New*/
+    list[i++] =  new sphere(vec3(400, 210, 210),150, new lambertian( pertext));/*New*/
+    // list[i++] = new sphere(vec3(165, 330, 165), 70, new metal(vec3(0.8, 0.8, 0.9), 10.0));/*New*/
+    //x左y上z外
+    texture *checker = new checker_texture(
+    new constant_texture(vec3(0.05, 0.05, 0.05)),
+    new constant_texture(vec3(0.9, 0.9, 0.9))
+);
+    list[i++] = new sphere(vec3(90, 90, 90),100, new lambertian(checker));
     *scene = new hitable_list(list,i);
+
     vec3 lookfrom(278, 278, -800);
     vec3 lookat(278,278,0);
     float dist_to_focus = 10.0;
@@ -87,9 +96,9 @@ void cornell_box(hitable **scene, camera **cam, float aspect) {
 int main() {
     ofstream out("final.ppm");
     time_t start=time(0);
-    int nx = 500;
-    int ny = 500;
-    int ns = 1000;
+    int nx = 200;
+    int ny = 200;
+    int ns = 50;
     out << "P3\n" << nx << " " << ny << "\n255\n";
     hitable *world;
     camera *cam;

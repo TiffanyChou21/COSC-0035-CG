@@ -41,30 +41,38 @@ vec3 light_origin = vec3(0, 555, 0);
 
 void cornell_box(hitable **scene, camera **cam, float aspect)
 {
-    int i = 0;
-    hitable **list = new hitable *[10];
-    material *red = new lambertian(new constant_texture(vec3(0.65f, 0.05f, 0.05f)));
-    material *white = new lambertian(new constant_texture(vec3(0.73f, 0.73f, 0.73f)));
-    material *green = new lambertian(new constant_texture(vec3(0.12f, 0.45f, 0.15f)));
-    material *light = new diffuse_light(new constant_texture(vec3(15, 15, 15)));
-    list[i++] = new flip_normals(new yz_rect(0, 555, 0, 555, 555, green));
-    list[i++] = new yz_rect(0, 555, 0, 555, 0, red);
-    fp = new flip_normals(new xz_rect(213, 343, 227, 332, 554, light));
-    list[i++] = fp;
-    list[i++] = new flip_normals(new xz_rect(0, 555, 0, 555, 555, white));
-    list[i++] = new xz_rect(0, 555, 0, 555, 0, white);
-    list[i++] = new flip_normals(new xy_rect(0, 555, 0, 555, 555, white));
-    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 165, 165), white), -18), vec3(130, 0, 65));
-    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 330, 165), white), 15), vec3(265, 0, 295));
-    int xx, yy, nn;/*New*/
-    unsigned char *tex_data = stbi_load("earthmap.jpg", &xx, &yy, &nn, 0);/*New*/
-    material *emat =  new lambertian(new image_texture(tex_data, xx, yy));/*New*/
-    list[i++] = new sphere(vec3(190, 190, 190), 90, emat);/*New*/
-    texture *pertext = new noise_texture(0.1);/*New*/
-    list[i++] =  new sphere(vec3(400, 210, 210),90, new lambertian( pertext));/*New*/
-    texture *checker = new checker_texture(new constant_texture(vec3(0.05, 0.05, 0.05)),new constant_texture(vec3(0.9, 0.9, 0.9)));/*New*/
-    list[i++] = new sphere(vec3(90, 90, 90),100, new lambertian(checker));
-    *scene = new hitable_list(list, i);
+	int i = 0;
+	hitable **list = new hitable *[10];
+	material *red = new lambertian(new constant_texture(vec3(0.65f, 0.05f, 0.05f)));
+	material *white = new lambertian(new constant_texture(vec3(0.73f, 0.73f, 0.73f)));
+	material *green = new lambertian(new constant_texture(vec3(0.12f, 0.45f, 0.15f)));
+	material *light = new diffuse_light(new constant_texture(vec3(15, 15, 15)));
+	list[i++] = new flip_normals(new yz_rect(0, 555, 0, 555, 555, green));
+	list[i++] = new yz_rect(0, 555, 0, 555, 0, red);
+	fp = new flip_normals(new xz_rect(213, 343, 227, 332, 554, light));
+	list[i++] = fp;
+	list[i++] = new flip_normals(new xz_rect(0, 555, 0, 555, 555, white));
+	list[i++] = new xz_rect(0, 555, 0, 555, 0, white);
+	list[i++] = new flip_normals(new xy_rect(0, 555, 0, 555, 555, white));
+	// list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 165, 165), white), -18), vec3(130, 0, 65));
+	// list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 330, 165), white), 15), vec3(265, 0, 295));
+	int xx, yy, nn;/*New*/
+	unsigned char *tex_data = stbi_load("earthmap.jpg", &xx, &yy, &nn, 0);/*New*/
+	//material *emat =  new lambertian(new image_texture(tex_data, xx, yy));/*New*/
+	//list[i++] = new sphere(vec3(190, 190, 190), 90, emat);/*New*/
+	//texture *pertext = new noise_texture(0.1);/*New*/
+	//list[i++] =  new sphere(vec3(400, 210, 210),90, new lambertian( pertext));/*New*/
+	//texture *checker = new checker_texture(new constant_texture(vec3(0.05, 0.05, 0.05)),new constant_texture(vec3(0.9, 0.9, 0.9)));/*New*/
+	//list[i++] = new sphere(vec3(90, 90, 90),100, new lambertian(checker));
+
+	// 所有点的三个坐标最大值设置为90
+	// 根据此变量缩放obj文件
+	model* obj = new model(white, 150);
+	obj->readFile("./objFile/cube.obj");
+
+	list[i++] = new rotate_y(obj, 15);
+
+    *scene = new hitable_list(list, i);	
 
 	vec3 lookfrom(278, 278, -800);
 	vec3 lookat(278, 278, 0);
@@ -152,6 +160,7 @@ int main()
     int allpix = nx*ny;
     int fa = 0;
 
+	//for (int j = (ny - 1) / 2; j >= 0; j--)
     for (int j = ny - 1; j >= 0; j--)
     {
         for (int i = 0; i < nx; i++)

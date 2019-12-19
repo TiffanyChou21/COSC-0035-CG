@@ -70,7 +70,7 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 	model* obj = new model(white, 150);
 	obj->readFile("./objFile/cube.obj");
 
-	list[i++] = new rotate_y(obj, 15);
+	list[i++] = new rotate_y(obj, 20);
 
     *scene = new hitable_list(list, i);	
 
@@ -143,7 +143,7 @@ int main()
 
     int nx = 600;
     int ny = 600;
-    int ns = 100;
+    int ns = 10;
 
     out << "P3\n" << nx << " " << ny << "\n255\n";
     
@@ -160,7 +160,7 @@ int main()
     int allpix = nx*ny;
     int fa = 0;
 
-	//for (int j = (ny - 1) / 2; j >= 0; j--)
+	//for (int j = 200; j >= 0; j--)
     for (int j = ny - 1; j >= 0; j--)
     {
         for (int i = 0; i < nx; i++)

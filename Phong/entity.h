@@ -98,10 +98,13 @@ bool Face::InterTriangle(const ray& r, hit_record& rec)
 	vec3 S=v1->loc-R0;
 	float mole =det(Rd.x(),E1.x(),E2.x(),Rd.y(),E1.y(),E2.y(),Rd.z(),E1.z(),E2.z());
 	temp_rec.t=det(S.x(),E1.x(),E2.x(),S.y(),E1.y(),E2.y(),S.z(),E1.z(),E2.z())/mole;
-	temp_rec.p.e[1]=det(Rd.x(),S.x(),E2.x(),Rd.y(),S.y(),E2.y(),Rd.z(),S.z(),E2.z())/mole;
-	temp_rec.p.e[2]=det(Rd.x(),E1.x(),S.x(),Rd.y(),E1.y(),S.y(),Rd.z(),E1.z(),S.z())/mole;
-	temp_rec.p.e[0]=1-temp_rec.p.e[1]-temp_rec.p.e[2];
-	if(temp_rec.t>0&&temp_rec.p.y()>=0&&temp_rec.p.y()<=1&&temp_rec.p.z()>=0&&temp_rec.p.z()<=1&&(temp_rec.p.y()+temp_rec.p.z()<=1))
+	//temp_rec.p.e[1]=det(Rd.x(),S.x(),E2.x(),Rd.y(),S.y(),E2.y(),Rd.z(),S.z(),E2.z())/mole;
+	//temp_rec.p.e[2]=det(Rd.x(),E1.x(),S.x(),Rd.y(),E1.y(),S.y(),Rd.z(),E1.z(),S.z())/mole;
+	//temp_rec.p.e[0]=1-temp_rec.p.e[1]-temp_rec.p.e[2];
+	float beta = det(Rd.x(), S.x(), E2.x(), Rd.y(), S.y(), E2.y(), Rd.z(), S.z(), E2.z()) / mole;
+	float gama = det(Rd.x(), E1.x(), S.x(), Rd.y(), E1.y(), S.y(), Rd.z(), E1.z(), S.z()) / mole;
+	temp_rec.p = R0 + temp_rec.t * Rd;
+	if(temp_rec.t>0&& beta >=0&& beta <=1&& gama >=0&& gama <=1&&(beta+ gama <=1))
 		hit_in=true;
 	rec.normal = this->normal;
 	rec = temp_rec;

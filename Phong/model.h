@@ -10,6 +10,8 @@
 #include <math.h>
 #include <limits.h>
 #include <iostream>
+#include "rotate.h"
+#include "translate.h"
 
 using namespace std;
 
@@ -43,7 +45,7 @@ public:
 
 	float maxDist;
 
-	box boundBox;
+	hitable* boundBox;
 };
 
 bool model::bounding_box(float t0, float t1, aabb &box) const
@@ -55,7 +57,7 @@ bool model::bounding_box(float t0, float t1, aabb &box) const
 bool model::hit(const ray &r, float t_min, float t_max, hit_record &rec) const
 {
 	// 如果没有命中包围盒，则为命中
-	if (!boundBox.hit(r, t_min, t_max, rec)) {
+	if (!boundBox->hit(r, t_min, t_max, rec)) {
 		return false;
 	}
 	rec.t = FLT_MAX;
@@ -151,6 +153,7 @@ bool model::readFile(string filename)
 				v3->edgeList.push_back(e3);
 				edgeV.push_back(e3);
 			}
+			// 此处法向量方向待纠正
 			newF->normal = cross(newF->v2->loc - newF->v1->loc, newF->v3->loc - newF->v2->loc);
 		}
 	}
@@ -189,7 +192,9 @@ bool model::readFile(string filename)
 
 	cout << "obj文件调整至" << roate << "倍" << endl;
 	cout << "obj平移至场景中心" << endl;
-	boundBox = box(vec3(x_min, y_min, z_min), vec3(x_max, y_max, z_max), this->mat_ptr);
+	cout << "包围盒位置:(" << x_min << ", " << y_min << ", " << z_min << ") --> ("
+		<< x_max << ", " << y_max << ", " << z_max << ")" << endl;
+	boundBox = new box(vec3(x_min, y_min, z_min), vec3(x_max, y_max, z_max), this->mat_ptr);
 	cout << "包围盒已添加" << endl;
 	return true;
 }

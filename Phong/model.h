@@ -36,15 +36,17 @@ public:
 	vector<Face *> faceV;
 	vector<Edge *> edgeV;
 
+	// 记录所有坐标中各个最大最小值
+	// 用于适当的将图形缩放和平移
 	float x_max = FLT_MIN;
 	float x_min = FLT_MAX;
 	float y_max = FLT_MIN;
 	float y_min = FLT_MAX;
 	float z_max = FLT_MIN;
 	float z_min = FLT_MAX;
-
 	float maxDist;
 
+	// 包围盒， 加速处理
 	hitable* boundBox;
 };
 
@@ -56,10 +58,11 @@ bool model::bounding_box(float t0, float t1, aabb &box) const
 
 bool model::hit(const ray &r, float t_min, float t_max, hit_record &rec) const
 {
-	// 如果没有命中包围盒，则为命中
+	// 如果没有命中包围盒，则未命中obj图形
 	if (!boundBox->hit(r, t_min, t_max, rec)) {
 		return false;
 	}
+	// 算出所有面中命中最近的
 	rec.t = FLT_MAX;
 	hit_record temp_rec;
 	bool flag = false;
@@ -68,7 +71,13 @@ bool model::hit(const ray &r, float t_min, float t_max, hit_record &rec) const
 		if (f->InterTriangle(r, temp_rec) && temp_rec.t < rec.t)
 		{
 			rec = temp_rec;
-			rec.normal = f->normal;
+			// 一般obj读取时，计算的面法向量向外，不会错
+			// 我们会采用简化处理(第二个大作业)后的obj文件，可能法向量会有所反转
+			// 此处判断限制了返回正确的法向量值
+			if (dot(r.direction(), f->normal) < 0)
+				rec.normal = f->normal;
+			else
+				rec.normal = -(f->normal);
 			rec.mat_ptr = this->mat_ptr;
 			flag = true;
 		}
@@ -154,6 +163,7 @@ bool model::readFile(string filename)
 				edgeV.push_back(e3);
 			}
 			// 此处法向量方向待纠正
+			// 已纠正
 			newF->normal = cross(newF->v2->loc - newF->v1->loc, newF->v3->loc - newF->v2->loc);
 		}
 	}
@@ -176,8 +186,9 @@ bool model::readFile(string filename)
 
 	vec3 move = vec3(278, 0, 278);
 	if (y_min < 0)
-		move.e[1] = -y_min;
+		move.e[1] = -roate*y_min;
 
+	// 对各个点位置进行缩放平移
 	for (auto v : this->vertexV) {
 		v->loc *= roate;
 		v->loc += move;

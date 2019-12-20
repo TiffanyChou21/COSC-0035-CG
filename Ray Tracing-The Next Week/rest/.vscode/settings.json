@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "__config": "cpp",
-        "random": "cpp",
-        "utility": "cpp",
-        "array": "cpp",
-        "algorithm": "cpp"
-    }
-}

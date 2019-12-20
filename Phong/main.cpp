@@ -85,10 +85,11 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 	model* obj = new model(white, 150);
 	// 此处设置obj文件路径
 	// obj读取时已经适当的缩放和平移，已适应到场景中心
-	obj->readFile("./objFile/block_modify.obj");
+	obj->readFile("./objFile/Arma.obj");
 	// 如果需要，适当旋转
 	// 正数为沿z轴逆时针
 	list[i++] = new rotate_y(obj, 20);
+	//list[i++] = new translate(new rotate_y(obj, 20), vec3(0, 0, 100));
 
     *scene = new hitable_list(list, i);	
 
@@ -186,6 +187,8 @@ int main()
 	// 用于计算当前完成比例
     int allpix = nx*ny;
     int fa = 0;
+	// 当前完成率
+	int finishRate = 0;
 
 	//for (int j = (ny - 1) / 2; j >= 0; j--)
     for (int j = ny - 1; j >= 0; j--)
@@ -219,7 +222,6 @@ int main()
 
 			// 显示完成比例
             fa++;
-			int finishRate = 0;
 			if (fa % 3600 == 0) {
 				finishRate++;
 				cout << "[";

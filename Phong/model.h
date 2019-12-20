@@ -25,7 +25,7 @@ class model : public hitable
 public:
 	model() {}
 	model(material *b, float maxt)
-		: mat_ptr(b), maxDist(maxt) {};
+		: mat_ptr(b), maxDist(maxt){};
 	virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const;
 	virtual bool bounding_box(float t0, float t1, aabb &box) const;
 	bool readFile(string filename);
@@ -47,7 +47,7 @@ public:
 	float maxDist;
 
 	// 包围盒， 加速处理
-	hitable* boundBox;
+	hitable *boundBox;
 };
 
 bool model::bounding_box(float t0, float t1, aabb &box) const
@@ -59,7 +59,8 @@ bool model::bounding_box(float t0, float t1, aabb &box) const
 bool model::hit(const ray &r, float t_min, float t_max, hit_record &rec) const
 {
 	// 如果没有命中包围盒，则未命中obj图形
-	if (!boundBox->hit(r, t_min, t_max, rec)) {
+	if (!boundBox->hit(r, t_min, t_max, rec))
+	{
 		return false;
 	}
 	// 算出所有面中命中最近的
@@ -164,7 +165,8 @@ bool model::readFile(string filename)
 			}
 			// 此处法向量方向待纠正
 			// 已纠正
-			newF->normal = cross(newF->v2->loc - newF->v1->loc, newF->v3->loc - newF->v2->loc);
+			// 精度问题，法向量的计算移动到缩放后计算
+			// newF->normal = cross(newF->v2->loc - newF->v1->loc, newF->v3->loc - newF->v2->loc);
 		}
 	}
 	cout << "顶点个数:" << vertexV.size() << endl;
@@ -186,25 +188,37 @@ bool model::readFile(string filename)
 
 	vec3 move = vec3(278, 0, 278);
 	if (y_min < 0)
-		move.e[1] = -roate*y_min;
+		move.e[1] = -roate * y_min;
 
 	// 对各个点位置进行缩放平移
-	for (auto v : this->vertexV) {
+	for (auto v : this->vertexV)
+	{
 		v->loc *= roate;
 		v->loc += move;
 		//cout << "(" << v->loc.x() << ", " << v->loc.y() << ", " << v->loc.z() << ")" << endl;
 	}
-	x_max *= roate; x_max += 278;
-	x_min *= roate; x_min += 278;
-	y_max *= roate; y_max += move.y();
-	y_min *= roate; y_min += move.y();
-	z_max *= roate; z_max += 278;
-	z_min *= roate; z_min += 278;
+	x_max *= roate;
+	x_max += 278;
+	x_min *= roate;
+	x_min += 278;
+	y_max *= roate;
+	y_max += move.y();
+	y_min *= roate;
+	y_min += move.y();
+	z_max *= roate;
+	z_max += 278;
+	z_min *= roate;
+	z_min += 278;
+
+	for (auto f : this->faceV)
+	{
+		f->normal = unit_vector(cross(f->v2->loc - f->v1->loc, f->v3->loc - f->v2->loc));
+	}
 
 	cout << "obj文件调整至" << roate << "倍" << endl;
 	cout << "obj平移至场景中心" << endl;
 	cout << "包围盒位置:(" << x_min << ", " << y_min << ", " << z_min << ") --> ("
-		<< x_max << ", " << y_max << ", " << z_max << ")" << endl;
+		 << x_max << ", " << y_max << ", " << z_max << ")" << endl;
 	boundBox = new box(vec3(x_min, y_min, z_min), vec3(x_max, y_max, z_max), this->mat_ptr);
 	cout << "包围盒已添加" << endl;
 	return true;

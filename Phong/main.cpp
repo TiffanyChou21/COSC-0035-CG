@@ -85,7 +85,7 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 	model* obj = new model(white, 150);
 	// 此处设置obj文件路径
 	// obj读取时已经适当的缩放和平移，已适应到场景中心
-	obj->readFile("./objFile/Arma.obj");
+	obj->readFile("./objFile/bunny_modify.obj");
 	// 如果需要，适当旋转
 	// 正数为沿z轴逆时针
 	list[i++] = new rotate_y(obj, 20);

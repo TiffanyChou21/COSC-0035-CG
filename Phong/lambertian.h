@@ -1,4 +1,4 @@
-#ifndef LAMBERTIANH 
+#ifndef LAMBERTIANH
 #define LAMBERTIANH
 
 #include "material.h"
@@ -12,19 +12,20 @@ extern vec3 random_in_unit_sphere();
 class lambertian : public material
 {
 public:
-    lambertian(texture* alb): albedo(alb)
+    lambertian(texture *alb) : albedo(alb)
     {
     }
 
-    virtual float scattering_pdf(const ray& r_in, const hit_record& rec, const ray& scattered) const
+    virtual float scattering_pdf(const ray &r_in, const hit_record &rec, const ray &scattered) const
     {
         float cosine = dot(rec.normal, unit_vector(scattered.direction()));
-        if (cosine < 0) cosine = 0;
+        if (cosine < 0)
+            cosine = 0;
         //É¢ÉäÖµµÄpdf
         return cosine / float(M_PI);
     }
 
-    virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered, float &pdf)
+    virtual bool scatter(const ray &r_in, const hit_record &rec, vec3 &attenuation, ray &scattered, float &pdf)
     {
         onb uvw;
         uvw.build_from_w(rec.normal);
@@ -38,8 +39,7 @@ public:
         return true;
     }
 
-    texture* albedo;
+    texture *albedo;
 };
-
 
 #endif

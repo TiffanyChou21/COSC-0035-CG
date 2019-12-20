@@ -8,8 +8,12 @@ class hitable_list : public hitable
 {
 public:
     hitable_list() {}
-    hitable_list(hitable **l, int n) { list = l; list_size = n; }
-    virtual bool hit(const ray& r, float tmin, float tmax, hit_record& rec)const
+    hitable_list(hitable **l, int n)
+    {
+        list = l;
+        list_size = n;
+    }
+    virtual bool hit(const ray &r, float tmin, float tmax, hit_record &rec) const
     {
         hit_record temp_rec;
         bool hit_anything = false;
@@ -26,17 +30,15 @@ public:
         return hit_anything;
     }
 
-    bool bounding_box(float t0, float t1, aabb& box) const
+    bool bounding_box(float t0, float t1, aabb &box) const
     {
-        //这里可以不实现, hitable_list只是一个容器
+        // 可以不实现, hitable_list只是一个容器
         box = aabb(vec3(0.0f, 0.0f, 0.0f), vec3(1.0f, 1.0f, 1.0f));
         return true;
     }
 
-
-    hitable ** list;
+    hitable **list;
     int list_size;
 };
-
 
 #endif

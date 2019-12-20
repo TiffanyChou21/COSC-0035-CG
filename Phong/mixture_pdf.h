@@ -8,12 +8,13 @@ class mixture_pdf : public pdf
 public:
     mixture_pdf(pdf *p0, pdf *p1)
     {
-        p[0] = p0; p[1] = p1;
+        p[0] = p0;
+        p[1] = p1;
     }
 
-    virtual float value(const vec3& direction) const
+    virtual float value(const vec3 &direction) const //一半方向一半光源pdf混合，效果更好
     {
-        return 0.5f * p[0]->value(direction) + 0.5f*p[1]->value(direction);
+        return 0.5f * p[0]->value(direction) + 0.5f * p[1]->value(direction);
     }
 
     virtual vec3 generate() const

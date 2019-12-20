@@ -6,6 +6,8 @@
 #include "flip_normals.h"
 #include "hitable_list.h"
 
+// 可作为立方体
+// 也可作为包围盒
 class box : public hitable
 {
 public:
@@ -14,6 +16,7 @@ public:
     {
         pmin = p0;
         pmax = p1;
+        // 六个面
         hitable **list = new hitable *[6];
         list[0] = new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), ptr);
         list[1] = new flip_normals(new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), ptr));

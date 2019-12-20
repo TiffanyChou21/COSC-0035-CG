@@ -82,13 +82,14 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 
 	// 所有点的三个坐标最大值设置为90
 	// 根据此变量缩放obj文件
-	model* obj = new model(white, 150);
+	model* obj = new model(white, 200);
 	// 此处设置obj文件路径
 	// obj读取时已经适当的缩放和平移，已适应到场景中心
-	obj->readFile("./objFile/bunny_modify.obj");
+	obj->readFile("./objFile/dragon_modify.obj");
 	// 如果需要，适当旋转
 	// 正数为沿z轴逆时针
-	list[i++] = new rotate_y(obj, 20);
+	// list[i++] = obj;
+	list[i++] = new rotate_y(obj, -15);
 	//list[i++] = new translate(new rotate_y(obj, 20), vec3(0, 0, 100));
 
     *scene = new hitable_list(list, i);	
@@ -167,9 +168,9 @@ int main()
     ofstream out("final.ppm");
     time_t start=time(0);  
 
-    int nx = 600;
-    int ny = 600;
-    int ns = 10;
+    int nx = 800;
+    int ny = 800;
+    int ns = 100;
 
     out << "P3\n" << nx << " " << ny << "\n255\n";
     
@@ -187,6 +188,7 @@ int main()
 	// 用于计算当前完成比例
     int allpix = nx*ny;
     int fa = 0;
+	int everyRate = allpix/100;
 	// 当前完成率
 	int finishRate = 0;
 
@@ -222,7 +224,7 @@ int main()
 
 			// 显示完成比例
             fa++;
-			if (fa % 3600 == 0) {
+			if (fa % everyRate == 0) {
 				finishRate++;
 				cout << "[";
 				int i;

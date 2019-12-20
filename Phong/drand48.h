@@ -13,15 +13,12 @@ float drand48(void)
 {
     seed = (a_ * seed + c_) & 0xFFFFFFFFFFFFLL;
     unsigned int x = (unsigned int)(seed >> 16);
-    return 	(float((double)x / (double)m_));
-
+    return (float((double)x / (double)m_));
 }
 
 void srand48(unsigned int i)
 {
     seed = (((long long int)i) << 16) | rand();
 }
-
-
 
 #endif

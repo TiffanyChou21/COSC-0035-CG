@@ -11,7 +11,7 @@
 class vec3
 {
 public:
-    vec3(){}
+    vec3() {}
     vec3(float e0, float e1, float e2)
     {
         e[0] = e0;
@@ -41,12 +41,12 @@ public:
     inline float g() const { return e[1]; }
     inline float b() const { return e[2]; }
 
-    inline const vec3& operator+() const { return *this; }
+    inline const vec3 &operator+() const { return *this; }
     inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
     inline float operator[](int i) const { return e[i]; }
-    inline float& operator[](int i) { return e[i]; }
+    inline float &operator[](int i) { return e[i]; }
 
-    inline vec3& operator+=(const vec3 &v2)
+    inline vec3 &operator+=(const vec3 &v2)
     {
         e[0] += v2.e[0];
         e[1] += v2.e[1];
@@ -54,7 +54,7 @@ public:
         return *this;
     }
 
-    inline vec3& operator-=(const vec3 &v2)
+    inline vec3 &operator-=(const vec3 &v2)
     {
         e[0] -= v2.e[0];
         e[1] -= v2.e[1];
@@ -62,7 +62,7 @@ public:
         return *this;
     }
 
-    inline vec3& operator*=(const vec3 &v2)
+    inline vec3 &operator*=(const vec3 &v2)
     {
         e[0] *= v2.e[0];
         e[1] *= v2.e[1];
@@ -70,7 +70,7 @@ public:
         return *this;
     }
 
-    inline vec3& operator/=(const vec3 &v2)
+    inline vec3 &operator/=(const vec3 &v2)
     {
         e[0] /= v2.e[0];
         e[1] /= v2.e[1];
@@ -78,7 +78,7 @@ public:
         return *this;
     }
 
-    inline vec3& operator*=(const float t)
+    inline vec3 &operator*=(const float t)
     {
         e[0] *= t;
         e[1] *= t;
@@ -86,7 +86,7 @@ public:
         return *this;
     }
 
-    inline vec3& operator/=(const float t)
+    inline vec3 &operator/=(const float t)
     {
         e[0] /= t;
         e[1] /= t;
@@ -94,7 +94,7 @@ public:
         return *this;
     }
 
-    inline float length() const { return std::sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);}
+    inline float length() const { return std::sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
     inline float squared_length() const { return (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
 
     inline void make_unit_vector()
@@ -105,7 +105,7 @@ public:
         e[2] /= len;
     }
 
-    float e[3];        
+    float e[3];
 };
 
 inline vec3 operator+(const vec3 &v1, const vec3 &v2)
@@ -150,11 +150,10 @@ inline float dot(const vec3 &v1, const vec3 &v2)
 
 inline vec3 cross(const vec3 &v1, const vec3 &v2)
 {
-    return vec3( 
-        (v1.e[1]*v2.e[2]-v1.e[2]*v2.e[1]),
-        (-(v1.e[0]*v2.e[2] - v1.e[2]*v2.e[0])),
-        (v1.e[0]*v2.e[1] - v1.e[1]*v2.e[0])
-    );
+    return vec3(
+        (v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1]),
+        (-(v1.e[0] * v2.e[2] - v1.e[2] * v2.e[0])),
+        (v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]));
 }
 
 inline vec3 unit_vector(vec3 v)
@@ -162,25 +161,25 @@ inline vec3 unit_vector(vec3 v)
     return v / v.length();
 }
 
-vec3 reflect(const vec3 &v, const vec3& n)  //不考虑视角的反射光线计算
+vec3 reflect(const vec3 &v, const vec3 &n) //不考虑视角的反射光线计算
 {
-    return v - 2 * dot(v, n)*n;
+    return v - 2 * dot(v, n) * n;
 }
 
-bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted)
-{//折射计算Snell定律    ni_over_nt是下方介质相当于上方介质的折射率
-    vec3 uv = unit_vector(v);    //入射光线单位化
-    float dt = dot(uv, n);    //计算与法线的cosθ 
-    float discriminant = 1.0f - ni_over_nt*ni_over_nt*(1 - dt*dt);   //根据公式推导出来的下方介质的cosθ'
+bool refract(const vec3 &v, const vec3 &n, float ni_over_nt, vec3 &refracted)
+{                                                                        //折射计算Snell定律    ni_over_nt是下方介质相当于上方介质的折射率
+    vec3 uv = unit_vector(v);                                            //入射光线单位化
+    float dt = dot(uv, n);                                               //计算与法线的cosθ
+    float discriminant = 1.0f - ni_over_nt * ni_over_nt * (1 - dt * dt); //根据公式推导出来的下方介质的cosθ'
     if (discriminant > 0)
     {
-        refracted = ni_over_nt * (uv - n*dt) - n*sqrt(discriminant);//转换回折射光线
+        refracted = ni_over_nt * (uv - n * dt) - n * sqrt(discriminant); //转换回折射光线
         return true;
     }
-    return false;   
+    return false;
 }
 
-float schlick(float cosine, float ref_idx)  //Schlick简单方法，用以估计反射和折射的比例
+float schlick(float cosine, float ref_idx) //Schlick简单方法，用以估计反射和折射的比例
 {
     float r0 = (1 - ref_idx) / (1 + ref_idx);
     r0 = r0 * r0;
@@ -192,18 +191,18 @@ vec3 random_in_unit_disk()
     vec3 p;
     do
     {
-        p = 2.0f*vec3(drand48(), drand48(), 0.0f) - vec3(1, 1, 0);
+        p = 2.0f * vec3(drand48(), drand48(), 0.0f) - vec3(1, 1, 0);
     } while (dot(p, p) >= 1.0);
     return p;
 }
 
-inline vec3 random_cosine_direction()
+inline vec3 random_cosine_direction() //随机生成余弦分布中的一个方向向量
 {
     float r1 = drand48();
     float r2 = drand48();
-    float z = sqrt(1 - r2);
-    float phi = 2.0f * float(M_PI)*r1;
-    float x = cos(phi) * 2 * sqrt(r2);
+    float z = sqrt(1 - r2);              //单位向量
+    float phi = 2.0f * float(M_PI) * r1; //生成φ
+    float x = cos(phi) * 2 * sqrt(r2);   //根据公式计算
     float y = sin(phi) * 2 * sqrt(r2);
     return vec3(x, y, z);
 }

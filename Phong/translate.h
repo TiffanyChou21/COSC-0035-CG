@@ -3,13 +3,13 @@
 
 #include "hitable.h"
 
+// 实现对模型在坐标系的平移
 class translate : public hitable
 {
 public:
-    translate(hitable* p, const vec3& displacement) : ptr(p), offset(displacement) {}
-    virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const
+    translate(hitable *p, const vec3 &displacement) : ptr(p), offset(displacement) {}
+    virtual bool hit(const ray &r, float t_min, float t_max, hit_record &rec) const
     {
-        // ray moved_r(r.origin() - offset, r.direction(), r.time());
         ray moved_r(r.origin() - offset, r.direction());
         if (ptr->hit(moved_r, t_min, t_max, rec))
         {
@@ -20,7 +20,7 @@ public:
             return false;
     }
 
-    virtual bool bounding_box(float t0, float t1, aabb& box) const
+    virtual bool bounding_box(float t0, float t1, aabb &box) const
     {
         if (ptr->bounding_box(t0, t1, box))
         {
@@ -31,8 +31,7 @@ public:
             return false;
     }
 
-    
-    hitable* ptr;
+    hitable *ptr;
     vec3 offset;
 };
 

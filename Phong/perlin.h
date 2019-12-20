@@ -2,9 +2,10 @@
 #define PERLINH
 
 #include "vec3.h"
-#include "drand48.h"
+#include "drand48.h" 
 
-inline float perlin_interp(vec3 c[2][2][2], float u, float v, float w)
+
+inline float perlin_interp(vec3 c[2][2][2], float u, float v, float w)//进行xyz三个方向的线性插值，主要是中间过渡值，使其自然
 {
     float uu = u*u*(3 - 2 * u);
     float vv = v*v*(3 - 2 * v);
@@ -22,11 +23,11 @@ inline float perlin_interp(vec3 c[2][2][2], float u, float v, float w)
     return accum;
 }
 
-
+// 实现柏林噪声用于纹理
 class perlin
 {
 public:
-    float noise(const vec3& p) const 
+    float noise(const vec3& p) const    //随机生成噪声值
     {
         float u = p.x() - floor(p.x());
         float v = p.y() - floor(p.y());
@@ -47,7 +48,7 @@ public:
     }
 
     float turb(const vec3& p, int depth = 7)const
-    {
+    {//增强多重采样的效果，使明更明，暗更暗
         float accum = 0.0f;
         vec3 temp_p = p;
         float weight = 1.0f;
@@ -68,18 +69,18 @@ public:
 };
 
 
-static vec3* perlin_generate()
+static vec3* perlin_generate()  //生成最终柏林噪声
 {
     vec3* p = new vec3[256];
     for (int i = 0; i < 256; ++i)
-    {
+    {//随机单位向量增强各个方向插值效果，多次
         p[i] = unit_vector(vec3(-1 + 2*drand48(), -1 + 2*drand48(), -1 + 2*drand48()));
     }
     return p;
 }
 
 void permute(int *p, int n)
-{
+{//随机排列生成的256个0-1
     for (int i = n - 1; i > 0; i--)
     {
         int target = int(drand48() * (i + 1));
@@ -91,7 +92,7 @@ void permute(int *p, int n)
 }
 
 static int* perlin_generate_perm()
-{
+{//重排色块生成
     int *p = new int[256];
     for (int i = 0; i < 256; i++)
     {

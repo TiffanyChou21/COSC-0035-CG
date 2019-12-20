@@ -3,10 +3,10 @@
 
 #include "material.h"
 
-class dielectric : public material
+class dielectric : public material    //电解质，即透明的处理
 {
 public:
-    dielectric(float ri):ref_idx(ri) {}
+    dielectric(float ri):ref_idx(ri) {}  //折射率
     virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const 
     {
         vec3 outward_normal;
@@ -17,21 +17,19 @@ public:
         vec3 refracted;
         float reflect_prob;
         float cosine;
-
-        //对于单个球体来说，无论从哪个角度来碰撞，法线都是从球心指向碰撞点（暂不考虑半径为负的情况），当
-        //光线从外部观察时，dot(r_in.direction(), rec.normal)<0
-        //当从球体内部往外射时dot(r_in.direction(), rec.normal)>0
+        // 单球体的法线都是从球心指向与光线交点
         if (dot(r_in.direction(), rec.normal) > 0)
-        {
+        {//光线从球体内部向外射的时候即cos>0
             outward_normal = -rec.normal;
             ni_over_nt = ref_idx;
-            cosine = /*ref_idx **/ dot(r_in.direction(), rec.normal) / r_in.direction().length();
+            /*ref_idx*/ 
+            cosine = dot(r_in.direction(), rec.normal) / r_in.direction().length();
         }
         else
         {
             //从外部往球体内部射
             outward_normal = rec.normal;
-            ni_over_nt = 1.0f / ref_idx;
+            ni_over_nt = 1.0f / ref_idx;  //外面是空气所以是1
             cosine = -dot(r_in.direction(), rec.normal) / r_in.direction().length();
         }
 
@@ -48,7 +46,7 @@ public:
             reflect_prob = 1.0;
         }
 
-        if (drand48() < reflect_prob)
+        if (drand48() < reflect_prob)  //使用随机数叠加最终结果
         {
             scattered = ray(rec.p, reflected);
         }

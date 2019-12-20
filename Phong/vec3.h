@@ -157,30 +157,30 @@ inline vec3 cross(const vec3 &v1, const vec3 &v2)
     );
 }
 
-vec3 reflect(const vec3 &v, const vec3& n)
-{
-    return v - 2 * dot(v, n)*n;
-}
-
 inline vec3 unit_vector(vec3 v)
 {
     return v / v.length();
 }
 
-bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted)
+vec3 reflect(const vec3 &v, const vec3& n)  //不考虑视角的反射光线计算
 {
-    vec3 uv = unit_vector(v);
-    float dt = dot(uv, n);
-    float discriminant = 1.0f - ni_over_nt*ni_over_nt*(1 - dt*dt);
-    if (discriminant > 0)
-    {
-        refracted = ni_over_nt * (uv - n*dt) - n*sqrt(discriminant);
-        return true;
-    }
-    return false;
+    return v - 2 * dot(v, n)*n;
 }
 
-float schlick(float cosine, float ref_idx)
+bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted)
+{//折射计算Snell定律    ni_over_nt是下方介质相当于上方介质的折射率
+    vec3 uv = unit_vector(v);    //入射光线单位化
+    float dt = dot(uv, n);    //计算与法线的cosθ 
+    float discriminant = 1.0f - ni_over_nt*ni_over_nt*(1 - dt*dt);   //根据公式推导出来的下方介质的cosθ'
+    if (discriminant > 0)
+    {
+        refracted = ni_over_nt * (uv - n*dt) - n*sqrt(discriminant);//转换回折射光线
+        return true;
+    }
+    return false;   
+}
+
+float schlick(float cosine, float ref_idx)  //Schlick简单方法，用以估计反射和折射的比例
 {
     float r0 = (1 - ref_idx) / (1 + ref_idx);
     r0 = r0 * r0;

@@ -6,7 +6,7 @@
 #include "aabb.h"
 
 void get_sphere_uv(const vec3& p, float& u, float& v)
-{
+{//根据交点求纹理坐标的函数,具体推导见报告，这里公式不好敲_(:з」∠)_
     float phi = atan2(p.z(), p.x());
     float theta = asin(p.y());
     u = float(1 - (phi + M_PI) / (2 * M_PI));

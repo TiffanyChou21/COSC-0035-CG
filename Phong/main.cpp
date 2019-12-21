@@ -30,7 +30,6 @@ using namespace std;
 #include "flip_normals.h"
 #include "translate.h"
 #include "rotate.h"
-// #include "constant_medium.h"
 #include "pdf.h"
 #include "hitable_pdf.h"
 #include "mixture_pdf.h"
@@ -87,7 +86,7 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 	// obj读取时已经适当的缩放和平移，已适应到场景中心
 	obj->readFile("./objFile/dragon_modify.obj");
 	// 如果需要，适当旋转
-	// 正数为沿z轴逆时针
+	// 正数为沿y轴逆时针
 	// list[i++] = obj;
 	list[i++] = new rotate_y(obj, -15);
 	//list[i++] = new translate(new rotate_y(obj, 20), vec3(0, 0, 100));
@@ -98,8 +97,6 @@ void cornell_box(hitable **scene, camera **cam, float aspect)
 	vec3 lookfrom(278, 278, -800);
 	// 向该位置看
 	vec3 lookat(278, 278, 0);
-	// float dist_to_focus = 10.0f;
-	// float aperture = 0.0f;
 	float vfov = 40.0f;
 	*cam = new camera(lookfrom, lookat, vec3(0, 1, 0), vfov, aspect);
 }
@@ -134,11 +131,10 @@ vec3 color(const ray& r, hitable* world, int depth)
 
         if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered, pdf_val))
         {
-            hitable_pdf p0(fp, rec.p);
-            cosine_pdf p1(rec.normal);
+            hitable_pdf p0(fp, rec.p);   //物体pdf
+            cosine_pdf p1(rec.normal);   //光源pdf
             mixture_pdf p(&p0, &p1);
-            // ray scattered = ray(hrec.p, p.generate(), r.time());/*New*/
-            ray scattered = ray(rec.p, p.generate());/*New*/
+            ray scattered = ray(rec.p, p.generate());//随机生成的散射光(漫反射)
             pdf_val = p.value(scattered.direction());
 
 			vec3 refCol = vec3(0, 0, 0);
@@ -191,8 +187,7 @@ int main()
 	int everyRate = allpix/100;
 	// 当前完成率
 	int finishRate = 0;
-
-	//for (int j = (ny - 1) / 2; j >= 0; j--)
+	
     for (int j = ny - 1; j >= 0; j--)
     {
         for (int i = 0; i < nx; i++)

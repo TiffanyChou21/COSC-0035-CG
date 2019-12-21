@@ -94,10 +94,10 @@ public:
         return *this;
     }
 
-    inline float length() const { return std::sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
+    inline float length() const { return std::sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }   //向量模长
     inline float squared_length() const { return (e[0] * e[0] + e[1] * e[1] + e[2] * e[2]); }
 
-    inline void make_unit_vector()
+    inline void make_unit_vector()  //向量标准化
     {
         float len = length();
         e[0] /= len;
@@ -143,12 +143,12 @@ inline vec3 operator/(const vec3 &v1, float t)
     return vec3(v1.e[0] / t, v1.e[1] / t, v1.e[2] / t);
 }
 
-inline float dot(const vec3 &v1, const vec3 &v2)
+inline float dot(const vec3 &v1, const vec3 &v2)   //点乘
 {
     return v1.e[0] * v2.e[0] + v1.e[1] * v2.e[1] + v1.e[2] * v2.e[2];
 }
 
-inline vec3 cross(const vec3 &v1, const vec3 &v2)
+inline vec3 cross(const vec3 &v1, const vec3 &v2)  //叉乘
 {
     return vec3(
         (v1.e[1] * v2.e[2] - v1.e[2] * v2.e[1]),
@@ -156,7 +156,7 @@ inline vec3 cross(const vec3 &v1, const vec3 &v2)
         (v1.e[0] * v2.e[1] - v1.e[1] * v2.e[0]));
 }
 
-inline vec3 unit_vector(vec3 v)
+inline vec3 unit_vector(vec3 v)   //该方向单位向量
 {
     return v / v.length();
 }
@@ -184,16 +184,6 @@ float schlick(float cosine, float ref_idx) //Schlick简单方法，用以估计�
     float r0 = (1 - ref_idx) / (1 + ref_idx);
     r0 = r0 * r0;
     return r0 + (1 - r0) * pow((1 - cosine), 5);
-}
-
-vec3 random_in_unit_disk()
-{
-    vec3 p;
-    do
-    {
-        p = 2.0f * vec3(drand48(), drand48(), 0.0f) - vec3(1, 1, 0);
-    } while (dot(p, p) >= 1.0);
-    return p;
 }
 
 inline vec3 random_cosine_direction() //随机生成余弦分布中的一个方向向量

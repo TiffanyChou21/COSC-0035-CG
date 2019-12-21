@@ -5,7 +5,7 @@
 #include "math.h"
 #include "aabb.h"
 
-// 实现沿y轴旋转
+// 实现沿y轴旋转  Cornell box 暂时不需要其它轴旋转
 class rotate_y : public hitable
 {
 public:

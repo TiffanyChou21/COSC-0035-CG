@@ -40,6 +40,7 @@ public:
                 get_sphere_uv(pNormalize, rec.u, rec.v);
                 return true;
             }
+            //远根
             temp = (-b + sqrt(b * b - a * c)) / a;
             if (temp < tmax && temp > tmin)
             {
@@ -55,7 +56,7 @@ public:
 
         return false;
     }
-
+    //包围盒±半径就行
     bool bounding_box(float t0, float t1, aabb &box) const
     {
         box = aabb(center - vec3(radius, radius, radius), center + vec3(radius, radius, radius));

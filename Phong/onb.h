@@ -3,7 +3,7 @@
 
 #include "vec3.h"
 
-class onb
+class onb    //标准正交基类  作用是将局部pdf 扩展到全局范围
 {
 public:
     onb() {}

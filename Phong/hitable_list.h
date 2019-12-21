@@ -4,6 +4,8 @@
 #include "hitable.h"
 #include "aabb.h"
 
+// 模型容器
+// 用于维护场景所有物体，包围盒六个面等
 class hitable_list : public hitable
 {
 public:
@@ -20,6 +22,8 @@ public:
         float closest_so_far = tmax;
         for (int i = 0; i < list_size; i++)
         {
+            // 逐个查看是否命中
+            // closest_so_far参数限制了最终获得最近的相交/hit信息
             if (list[i]->hit(r, tmin, closest_so_far, temp_rec))
             {
                 hit_anything = true;

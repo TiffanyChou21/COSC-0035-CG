@@ -3,7 +3,7 @@
 
 #include "hitable.h"
 
-// 仅用于反转面的法向量
+// 用于翻转面的法向量
 class flip_normals : public hitable
 {
 public:
@@ -12,6 +12,7 @@ public:
     {
         if (ptr->hit(r, t_min, t_max, rec))
         {
+            // 命中后法向量设为负值
             rec.normal = -rec.normal;
             return true;
         }

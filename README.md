@@ -1,5 +1,7 @@
 # COSC-0035-CG
 
+> Accomplished by 周辰霏1712991 & 姜奕兵1710218
+
 ## Project 1
 
 > [Ref](https://raytracing.github.io)
